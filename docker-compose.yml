@@ -1,0 +1,12 @@
+services:
+  frontend_girawebsite:
+    build:
+      context: .
+    image: frontend_girawebsite:latest
+    restart: unless-stopped
+    networks:
+      - caddy_network
+
+networks:
+  caddy_network:
+    external: true
