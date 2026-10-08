@@ -227,10 +227,43 @@
 }
 
 @media (max-width: 620px) {
-  .tp-hero-inner { padding: 36px 20px 40px; }
-  .tp-lead { font-size: 16px; }
-  .tp-theme-grid { grid-template-columns: 1fr; }
+  .tp-hero-inner { padding: 32px 20px 36px; }
+  .tp-back { margin-bottom: 22px; }
+  .tp-lead { margin: 16px auto 22px; font-size: 16px; }
+  .tp-studio { padding-top: 40px; }
+
+  /* Trade filters become one swipeable row instead of a tall wrapped block. */
+  .tp-trades {
+    margin-inline: -20px;
+    padding: 2px 20px 6px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scroll-padding-inline: 20px;
+  }
+
+  .tp-trades button { flex: none; }
+
+  /* Two phone-format previews per row. */
+  .tp-theme-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 14px; }
+  .tp-theme-meta { margin-top: 12px; }
+  .tp-theme-style { padding: 3px 8px; font-size: 10px; }
+  .tp-theme-meta strong { margin: 8px 0 2px; font-size: 16px; }
+  .tp-theme-meta small { font-size: 13px; }
+  .tp-theme-pick { margin-top: 8px; font-size: 12.5px; }
+  .tp-frame-fade { height: 50px; }
+
+  .tp-steps li { padding: 22px; }
+  .tp-cta { padding: 64px 20px; }
+  .tp-cta p { font-size: 16px; }
+}
+
+@media (max-height: 500px) {
+  .tp-hero-inner { padding: 28px 24px 32px; }
+  .tp-back { margin-bottom: 18px; }
+  .tp-lead { margin: 14px auto 20px; }
   .tp-studio { padding-top: 48px; }
+  .tp-cta { padding-block: 56px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

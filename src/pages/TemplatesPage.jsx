@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, ArrowRight, Check, LayoutTemplate, Palette, Rocket } from 'lucide-react'
 import SiteWireframe, { ScaledFrame } from '../components/wireframe/SiteWireframe'
 import TemplateStudio from '../components/templates/TemplateStudio'
+import useMediaQuery from '../hooks/useMediaQuery'
 import { getStructure, structures, themes, trades } from '../data/templateData'
 import '../components/templates/TemplateStudio.css'
 import './TemplatesPage.css'
@@ -28,6 +29,8 @@ export default function TemplatesPage({ initialStructure, initialTheme, onStart 
   const [structureId, setStructureId] = useState(initialStructure)
   const [themeId, setThemeId] = useState(initialTheme)
   const [trade, setTrade] = useState('all')
+  // Phones get phone-format previews in the theme gallery: a scaled-down desktop page is unreadable there.
+  const narrow = useMediaQuery('(max-width: 620px)')
 
   const structure = getStructure(structureId)
 
@@ -138,8 +141,12 @@ export default function TemplatesPage({ initialStructure, initialTheme, onStart 
                     <i />
                     <i />
                   </span>
-                  <ScaledFrame baseWidth={1000} maxHeight={300}>
-                    <SiteWireframe structure={structure} theme={t} />
+                  <ScaledFrame baseWidth={narrow ? 390 : 1000} maxHeight={narrow ? 250 : 300}>
+                    <SiteWireframe
+                      structure={structure}
+                      theme={t}
+                      device={narrow ? 'mobile' : 'desktop'}
+                    />
                   </ScaledFrame>
                   <span className="tp-frame-fade" />
                 </span>

@@ -13,8 +13,8 @@ export default function TemplatesSection({ onStart }) {
         <h2>Pick a structure. Then make it yours.</h2>
         <p>
           Start from a proven page layout, then dress it in a theme made for
-          your trade. Preview it on desktop or phone, and hover the page flow
-          to see exactly how your site is built.
+          your trade. Preview it on desktop or phone to see exactly how your
+          site is built.
         </p>
       </div>
 

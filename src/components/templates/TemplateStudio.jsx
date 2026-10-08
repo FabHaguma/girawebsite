@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ArrowRight,
   Check,
@@ -9,6 +9,7 @@ import {
   Smartphone,
 } from 'lucide-react'
 import SiteWireframe, { ScaledFrame } from '../wireframe/SiteWireframe'
+import useMediaQuery from '../../hooks/useMediaQuery'
 import {
   getStructure,
   getTheme,
@@ -48,18 +49,57 @@ export default function TemplateStudio({
   const structure = getStructure(structureId)
   const theme = getTheme(themeId)
 
-  const [device, setDevice] = useState('desktop')
+  const narrow = useMediaQuery('(max-width: 620px)')
+  const short = useMediaQuery('(max-height: 500px)')
+  const canHover = useMediaQuery('(hover: hover)')
+
+  // A phone-sized screen can't show a desktop page legibly, so start on the phone preview.
+  const [device, setDevice] = useState(() =>
+    window.matchMedia('(max-width: 620px)').matches ? 'phone' : 'desktop',
+  )
   const [expanded, setExpanded] = useState(false)
   const [hovered, setHovered] = useState(null)
   const [showAllThemes, setShowAllThemes] = useState(isPage)
+  const [locate, setLocate] = useState(null)
+  const stageRef = useRef(null)
+  const chipsRef = useRef(null)
 
   // Hovering a flow item opens the preview so the highlighted section is always visible.
   const open = expanded || hovered !== null
-  const collapsedHeight = isPage ? 720 : 640
+  const collapsedHeight = short ? 340 : narrow ? (isPage ? 560 : 440) : isPage ? 720 : 640
   const baseWidth = device === 'phone' ? 390 : 1000
 
+  // Without hover, tapping a flow item scrolls the preview to the section it highlights.
+  useEffect(() => {
+    if (!locate) return
+    stageRef.current
+      ?.querySelector('.wf-block.is-active')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [locate])
+
+  function locateBlock(i) {
+    setExpanded(true)
+    setHovered(i)
+    if (!canHover) setLocate({ i })
+  }
+
+  // Keep the selected theme in view when the chips scroll sideways. Only the row
+  // itself scrolls, so the page never jumps.
+  useEffect(() => {
+    const row = chipsRef.current
+    const chip = row?.querySelector('.theme-chip.is-active')
+    if (!row || !chip || row.scrollWidth <= row.clientWidth) return
+    const offset = chip.getBoundingClientRect().left - row.getBoundingClientRect().left
+    row.scrollTo({
+      left: row.scrollLeft + offset - (row.clientWidth - chip.offsetWidth) / 2,
+      behavior: 'smooth',
+    })
+  }, [theme.id, narrow])
+
+  // On phones themes sit in a swipeable row, so every theme is always available.
+  const listAllThemes = showAllThemes || narrow
   const firstThemes = themes.slice(0, 6)
-  const visibleThemes = showAllThemes
+  const visibleThemes = listAllThemes
     ? themes
     : firstThemes.some((t) => t.id === theme.id)
       ? firstThemes
@@ -113,7 +153,7 @@ export default function TemplateStudio({
           <span>2</span> Preview it, then choose a theme
         </p>
         <div className="studio-main">
-          <div className="stage">
+          <div className="stage" ref={stageRef}>
             <div className="stage-bar">
               <span className="stage-dots" aria-hidden="true">
                 <i />
@@ -124,6 +164,7 @@ export default function TemplateStudio({
               <div className="device-toggle" role="group" aria-label="Preview device">
                 <button
                   type="button"
+                  aria-label="Desktop"
                   aria-pressed={device === 'desktop'}
                   onClick={() => setDevice('desktop')}
                 >
@@ -131,6 +172,7 @@ export default function TemplateStudio({
                 </button>
                 <button
                   type="button"
+                  aria-label="Phone"
                   aria-pressed={device === 'phone'}
                   onClick={() => setDevice('phone')}
                 >
@@ -191,7 +233,7 @@ export default function TemplateStudio({
           </div>
 
           <aside className="panel">
-            <div className="panel-block">
+            <div className="panel-block panel-info">
               <span className="panel-eyebrow">Structure &middot; {structure.goal}</span>
               <h3>{structure.name}</h3>
               <p>{structure.blurb}</p>
@@ -204,7 +246,7 @@ export default function TemplateStudio({
               </div>
             </div>
 
-            <div className="panel-block">
+            <div className="panel-block panel-detail panel-pages">
               <span className="panel-eyebrow">Pages included</span>
               <div className="tags">
                 {structure.pages.map((p) => (
@@ -215,9 +257,11 @@ export default function TemplateStudio({
               </div>
             </div>
 
-            <div className="panel-block">
+            <div className="panel-block panel-detail panel-flow">
               <span className="panel-eyebrow">
-                Home page flow <small>hover to locate</small>
+                Home page flow{' '}
+                <small className="hint-hover">hover to locate</small>
+                <small className="hint-tap">tap to locate</small>
               </span>
               <ol className="flow" onMouseLeave={() => setHovered(null)}>
                 {structure.blocks.map((block, i) => (
@@ -228,7 +272,7 @@ export default function TemplateStudio({
                       onMouseEnter={() => setHovered(i)}
                       onFocus={() => setHovered(i)}
                       onBlur={() => setHovered(null)}
-                      onClick={() => setExpanded(true)}
+                      onClick={() => locateBlock(i)}
                     >
                       <span>{i + 1}</span>
                       {block.label}
@@ -238,9 +282,9 @@ export default function TemplateStudio({
               </ol>
             </div>
 
-            <div className="panel-block">
+            <div className="panel-block panel-themes">
               <span className="panel-eyebrow">Theme &middot; {theme.style}</span>
-              <div className="theme-chips">
+              <div className="theme-chips" ref={chipsRef}>
                 {visibleThemes.map((t) => (
                   <button
                     key={t.id}
@@ -257,18 +301,16 @@ export default function TemplateStudio({
                   </button>
                 ))}
               </div>
-              {!isPage && (
+              {!isPage && !narrow && (
                 <button
                   type="button"
                   className="text-link"
                   onClick={() => setShowAllThemes((v) => !v)}
                 >
-                  {showAllThemes
+                  {listAllThemes
                     ? 'Show fewer themes'
-                    : hiddenCount > 0
-                      ? `Show ${hiddenCount} more themes`
-                      : 'Show fewer themes'}
-                  {showAllThemes ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                    : `Show ${hiddenCount} more themes`}
+                  {listAllThemes ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
                 </button>
               )}
             </div>

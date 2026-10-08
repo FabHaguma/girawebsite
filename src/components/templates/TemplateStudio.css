@@ -4,6 +4,7 @@
 
 .studio {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 40px;
 }
 
@@ -292,6 +293,8 @@
   text-transform: none;
 }
 
+.hint-tap { display: none; }
+
 .panel h3 {
   margin: 0 0 8px;
   font-size: 24px;
@@ -464,14 +467,132 @@
   .studio-main { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* Landscape phones and small tablets: use the width by splitting the panel in two. */
+@media (min-width: 621px) and (max-width: 920px) {
+  .panel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      'info pages'
+      'flow themes';
+  }
+
+  .panel > .panel-block { border-top: 0; }
+  .panel-info { grid-area: info; }
+  .panel-pages { grid-area: pages; }
+  .panel-flow { grid-area: flow; }
+  .panel-themes { grid-area: themes; }
+  .panel > .panel-pages,
+  .panel > .panel-themes { border-left: 1px solid var(--line); }
+  .panel > .panel-flow,
+  .panel > .panel-themes { border-top: 1px solid var(--line); }
+}
+
+/* Short landscape screens: keep the studio from filling several screen heights. */
+@media (max-height: 500px) {
+  .section.studio-section { padding-block: 56px; }
+  .studio { gap: 28px; }
+  .strip-thumb { max-height: 150px; }
+}
+
+/* On landscape phones the home page is a summary too. */
+@media (min-width: 621px) and (max-width: 920px) and (max-height: 500px) and (pointer: coarse) {
+  .studio-home .panel { grid-template-areas: 'info themes'; }
+  .studio-home .panel-detail { display: none; }
+  .studio-home .panel > .panel-themes { border-top: 0; }
+}
+
 @media (max-width: 620px) {
-  .strip { grid-auto-columns: 74%; }
+  .studio { gap: 30px; }
+  .step-label { margin-bottom: 12px; font-size: 16px; }
+
+  /* Structure cards swipe edge to edge, with the next card peeking in. */
+  .strip {
+    grid-auto-columns: 72%;
+    padding: 12px 20px 14px;
+    margin: -12px -20px 0;
+    scroll-padding-inline: 20px;
+  }
+
+  .strip-card { padding: 10px 10px 14px; }
+  .strip-card:hover { transform: none; }
+
+  .stage-bar { padding: 0 8px 0 12px; }
   .device-toggle span { display: none; }
   .stage-url { display: none; }
-  .theme-chips { grid-template-columns: 1fr; }
-  .studio-action { padding: 20px; }
-  .action-buttons { width: 100%; }
-  .action-buttons .primary-button { width: 100%; }
+  .device-toggle button { padding: 7px 11px; }
+
+  .stage-body.is-phone { padding-top: 20px; }
+  .phone-shell { width: min(300px, 84%); }
+  .stage-fade { height: 90px; }
+
+  .panel-block { padding: 18px 16px 16px; }
+  .panel h3 { font-size: 21px; }
+
+  /* The home page is a summary; the full details live on the templates page. */
+  .studio-home .panel-detail { display: none; }
+
+  /* Page flow becomes wrapped pills instead of a long list. */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .flow button {
+    width: auto;
+    padding: 6px 12px 6px 6px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+  }
+
+  .flow button span { border-radius: 50%; }
+
+  /* Themes swipe in two rows instead of stacking into a tall list. */
+  .theme-chips {
+    grid-template-columns: none;
+    grid-template-rows: repeat(2, auto);
+    grid-auto-flow: column;
+    grid-auto-columns: 172px;
+    margin: -2px -16px 0;
+    padding: 2px 16px 8px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 16px;
+  }
+
+  .theme-chip { scroll-snap-align: start; }
+  .theme-chip:hover { transform: none; }
+
+  .studio-action {
+    padding: 18px 16px;
+    gap: 14px;
+  }
+
+  .action-summary { gap: 12px; }
+  .action-summary strong { font-size: 18px; }
+  .action-buttons { width: 100%; flex-direction: column-reverse; align-items: stretch; gap: 14px; }
+  .action-link {
+    padding: 12px;
+    justify-content: center;
+    border: 1px solid #ffffff33;
+    border-radius: 10px;
+  }
+  .action-buttons .primary-button { width: 100%; justify-content: center; }
+}
+
+/* Touch screens have no hover, and need larger tap targets. */
+@media (hover: none) {
+  .hint-hover { display: none; }
+  .hint-tap { display: inline; }
+}
+
+@media (pointer: coarse) {
+  .flow button { padding-block: 10px; }
+  .device-toggle button { padding: 9px 12px; }
+  .text-link { padding-block: 8px; }
+  .stage-expand { height: 54px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
