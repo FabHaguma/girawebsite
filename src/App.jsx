@@ -17,6 +17,7 @@ import './styles/App.css'
 // Rendered directly rather than through data-phone-* hydration, which runs before React mounts.
 const CONTACT_PHONE = { tel: '+250786072607', display: '+250 786 072 607' }
 const CONTACT_PLAN = 'Consultation'
+const POCKETBASE_URL = 'https://pb.haguma.com'
 
 const tiers = [
   {
@@ -65,28 +66,42 @@ const tiers = [
   },
 ]
 
-const webList = [
-  {
-    name: 'Afazari Parts',
-    trade: 'Cars Spare Parts and Fitting',
-    url: 'https://www.afazari.webyacu.com/',
-  },
-  {
-    name: 'Lustrelle',
-    trade: 'Jewelry store',
-    url: 'https://www.lustrelle.webyacu.com/',
-  },
-  {
-    name: 'Fabrice HAGUMA',
-    trade: 'Solution engineer portfolio',
-    url: 'https://portfolio.haguma.com/',
-  },
-  {
-    name: 'Ngwino Mechanic',
-    trade: 'Car repair and maintenance',
-    url: 'https://www.ngwinochris.webyacu.com/',
-  },
-]
+async function fetchWebsites(signal) {
+  const websites = []
+  const params = new URLSearchParams({
+    perPage: '200',
+    filter: 'for_who = "webyacu_list"',
+    sort: 'cardinal',
+    fields:
+      'id,collectionId,name,for_who,url,description,cardinal,thumbnail',
+  })
+  let page = 1
+  let totalPages = 1
+
+  while (page <= totalPages) {
+    params.set('page', String(page))
+    const response = await fetch(
+      `${POCKETBASE_URL}/api/collections/website_links/records?${params}`,
+      { signal },
+    )
+    const result = await response.json()
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Unable to load the website list.')
+    }
+
+    websites.push(...result.items)
+    totalPages = result.totalPages
+    page += 1
+  }
+
+  return websites
+}
+
+function getWebsiteThumbnailUrl(website) {
+  if (!website.thumbnail) return ''
+  return `${POCKETBASE_URL}/api/files/${website.collectionId}/${website.id}/${encodeURIComponent(website.thumbnail)}`
+}
 
 /* ---------- Tiny hash router: #/templates/<structure>/<theme> ---------- */
 
@@ -351,7 +366,30 @@ function IntakeModal({ selectedPlan, onClose }) {
 
 export default function App() {
   const [selectedPlan, setSelectedPlan] = useState('')
+  const [webList, setWebList] = useState([])
+  const [webListLoading, setWebListLoading] = useState(true)
+  const [webListError, setWebListError] = useState('')
+  const [webListRequest, setWebListRequest] = useState(0)
   const route = useRoute()
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    fetchWebsites(controller.signal)
+      .then(setWebList)
+      .catch((error) => {
+        if (error.name !== 'AbortError') {
+          setWebListError(error.message)
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setWebListLoading(false)
+        }
+      })
+
+    return () => controller.abort()
+  }, [webListRequest])
 
   return (
     <main>
@@ -415,30 +453,52 @@ export default function App() {
               </p>
             </div>
             <div className="template-grid">
-              {webList.map((web) => (
-                <article className="template" key={web.name}>
-                  <a
-                    href={web.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={`Visit ${web.name}`}
+              {webListLoading ? (
+                <p role="status">Loading websites...</p>
+              ) : webListError ? (
+                <div role="alert">
+                  <p>Could not load websites: {webListError}</p>
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={() => {
+                      setWebListLoading(true)
+                      setWebListError('')
+                      setWebListRequest((request) => request + 1)
+                    }}
                   >
-                    <div className="browser-preview">
-                      <div className="browser-bar">
-                        <i />
-                        <i />
-                        <i />
+                    Try again
+                  </button>
+                </div>
+              ) : (
+                webList.map((web) => (
+                  <article className="template" key={web.id}>
+                    <a
+                      href={web.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`Visit ${web.name}`}
+                    >
+                      <div className="browser-preview">
+                        <div className="browser-bar">
+                          <i />
+                          <i />
+                          <i />
+                        </div>
+                        <img
+                          src={
+                            getWebsiteThumbnailUrl(web) ||
+                            `https://image.thum.io/get/width/400/crop/800/${web.url}`
+                          }
+                          alt={`Preview of ${web.name}`}
+                        />
                       </div>
-                      <img
-                        src={`https://image.thum.io/get/width/400/crop/800/${web.url}`}
-                        alt={`Preview of ${web.name}`}
-                      />
-                    </div>
-                    <h3>{web.name}</h3>
-                    <p>{web.trade}</p>
-                  </a>
-                </article>
-              ))}
+                      <h3>{web.name}</h3>
+                      <p>{web.description}</p>
+                    </a>
+                  </article>
+                ))
+              )}
             </div>
           </section>
 
