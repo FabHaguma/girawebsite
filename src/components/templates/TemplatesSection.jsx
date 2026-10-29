@@ -1,32 +1,54 @@
-import { useState } from 'react'
-import TemplateStudio from './TemplateStudio'
-import './TemplateStudio.css'
+import { ArrowUpRight } from 'lucide-react'
+import { structures, themes } from '../../data/templateData'
 
-export default function TemplatesSection({ onStart }) {
-  const [structureId, setStructureId] = useState('showcase')
-  const [themeId, setThemeId] = useState('fixit-pro')
-
+export default function TemplatesSection() {
   return (
-    <section id="templates" className="section studio-section">
-      <div className="section-intro">
-        <p className="eyebrow">Templates &amp; themes</p>
-        <h2>Pick a structure. Then make it yours.</h2>
+    <section id="templates" className="section templates-teaser">
+      <div className="teaser-copy">
+        <p className="eyebrow">A STARTING POINT, NOT A LIMIT</p>
+        <h2>
+          A look that feels
+          <br />
+          <em>like your business.</em>
+        </h2>
         <p>
-          Start from a proven page layout, then dress it in a theme made for
-          your trade. Preview it on desktop or phone to see exactly how your
-          site is built.
+          Explore {structures.length} layouts and {themes.length} themes in our
+          template studio. Try a combination, find your direction, and we’ll
+          make it yours.
         </p>
+        <a className="text-link" href="#/templates/showcase/fixit-pro">
+          Explore templates & themes <ArrowUpRight size={19} />
+        </a>
       </div>
-
-      <TemplateStudio
-        variant="home"
-        structureId={structureId}
-        themeId={themeId}
-        onStructure={setStructureId}
-        onTheme={setThemeId}
-        onStart={onStart}
-        browseHref={`#/templates/${structureId}/${themeId}`}
-      />
+      <div className="theme-samples" aria-hidden="true">
+        <div className="sample sample-salon">
+          <div>maison rosé</div>
+          <p>
+            A moment
+            <br />
+            <em>just for you.</em>
+          </p>
+          <div className="sample-arch" />
+        </div>
+        <div className="sample sample-garden">
+          <div>greenyard</div>
+          <p>
+            A little closer
+            <br />
+            to nature.
+          </p>
+          <div className="sample-leaf" />
+        </div>
+        <div className="theme-sample-label">
+          <span className="color-dots">
+            <i />
+            <i />
+            <i />
+            <i />
+          </span>
+          Your layout. Your colours. Your personality.
+        </div>
+      </div>
     </section>
   )
 }

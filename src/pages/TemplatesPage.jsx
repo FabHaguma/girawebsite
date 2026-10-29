@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
-import { ArrowLeft, ArrowRight, Check, LayoutTemplate, Palette, Rocket } from 'lucide-react'
-import SiteWireframe, { ScaledFrame } from '../components/wireframe/SiteWireframe'
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
+import SiteWireframe, {
+  ScaledFrame,
+} from '../components/wireframe/SiteWireframe'
 import TemplateStudio from '../components/templates/TemplateStudio'
 import useMediaQuery from '../hooks/useMediaQuery'
 import { getStructure, structures, themes, trades } from '../data/templateData'
@@ -9,23 +11,24 @@ import './TemplatesPage.css'
 
 const steps = [
   {
-    Icon: LayoutTemplate,
     title: 'Choose a structure',
     text: 'Pick the page layout that matches what you want your website to do for you.',
   },
   {
-    Icon: Palette,
     title: 'Choose a theme',
     text: 'Select a look made for your trade. Colours, fonts and shapes are tailored to match your brand.',
   },
   {
-    Icon: Rocket,
     title: 'We build and launch',
     text: 'HagumaTech adds your content, photos and domain, then hands you a site that is easy to manage.',
   },
 ]
 
-export default function TemplatesPage({ initialStructure, initialTheme, onStart }) {
+export default function TemplatesPage({
+  initialStructure,
+  initialTheme,
+  onStart,
+}) {
   const [structureId, setStructureId] = useState(initialStructure)
   const [themeId, setThemeId] = useState(initialTheme)
   const [trade, setTrade] = useState('all')
@@ -36,7 +39,11 @@ export default function TemplatesPage({ initialStructure, initialTheme, onStart 
 
   // Keep the URL shareable without adding history entries.
   useEffect(() => {
-    window.history.replaceState(null, '', `#/templates/${structureId}/${themeId}`)
+    window.history.replaceState(
+      null,
+      '',
+      `#/templates/${structureId}/${themeId}`,
+    )
   }, [structureId, themeId])
 
   const recommended =
@@ -44,7 +51,9 @@ export default function TemplatesPage({ initialStructure, initialTheme, onStart 
       ? []
       : structures.filter((s) => s.bestFor.includes(trade)).map((s) => s.id)
 
-  const shownThemes = themes.filter((t) => trade === 'all' || t.tradeKey === trade)
+  const shownThemes = themes.filter(
+    (t) => trade === 'all' || t.tradeKey === trade,
+  )
 
   function pickTrade(key) {
     setTrade(key)
@@ -57,7 +66,9 @@ export default function TemplatesPage({ initialStructure, initialTheme, onStart 
 
   function chooseTheme(id) {
     setThemeId(id)
-    document.getElementById('studio')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    document
+      .getElementById('studio')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (
@@ -75,9 +86,9 @@ export default function TemplatesPage({ initialStructure, initialTheme, onStart 
             <strong>Make it yours.</strong>
           </h1>
           <p className="tp-lead">
-            {structures.length} page structures and {themes.length} themes, mixed
-            and matched to fit your trade. Preview every combination before you
-            commit.
+            {structures.length} page structures and {themes.length} themes,
+            mixed and matched to fit your trade. Preview every combination
+            before you commit.
           </p>
 
           <div className="tp-trades" role="group" aria-label="Filter by trade">
@@ -88,14 +99,14 @@ export default function TemplatesPage({ initialStructure, initialTheme, onStart 
             >
               All trades
             </button>
-            {trades.map(({ key, label, Icon }) => (
+            {trades.map(({ key, label }) => (
               <button
                 key={key}
                 type="button"
                 aria-pressed={trade === key}
                 onClick={() => pickTrade(key)}
               >
-                <Icon size={15} /> {label}
+                {label}
               </button>
             ))}
           </div>
@@ -141,7 +152,10 @@ export default function TemplatesPage({ initialStructure, initialTheme, onStart 
                     <i />
                     <i />
                   </span>
-                  <ScaledFrame baseWidth={narrow ? 390 : 1000} maxHeight={narrow ? 250 : 300}>
+                  <ScaledFrame
+                    baseWidth={narrow ? 390 : 1000}
+                    maxHeight={narrow ? 250 : 300}
+                  >
                     <SiteWireframe
                       structure={structure}
                       theme={t}
@@ -151,7 +165,10 @@ export default function TemplatesPage({ initialStructure, initialTheme, onStart 
                   <span className="tp-frame-fade" />
                 </span>
                 <span className="tp-theme-meta">
-                  <span className="tp-theme-style" style={{ background: t.colors.soft, color: t.colors.ink }}>
+                  <span
+                    className="tp-theme-style"
+                    style={{ background: t.colors.soft, color: t.colors.ink }}
+                  >
                     {t.style}
                   </span>
                   <strong>{t.name}</strong>
@@ -180,11 +197,9 @@ export default function TemplatesPage({ initialStructure, initialTheme, onStart 
           <h2>From idea to live website</h2>
         </div>
         <ol className="tp-steps">
-          {steps.map(({ Icon, title, text }, i) => (
+          {steps.map(({ title, text }, i) => (
             <li key={title}>
-              <span className="tp-step-icon">
-                <Icon size={22} />
-              </span>
+              <span className="tp-step-icon">0{i + 1}</span>
               <small>Step {i + 1}</small>
               <h3>{title}</h3>
               <p>{text}</p>
